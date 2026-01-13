@@ -77,10 +77,18 @@ Data.prototype.getDescription = function(v) {
             res += "<tr><td>" + key + "</td><td>" + v.labels[key] + "</td><td>" + table[v.labels[key]] + "</td></tr>"
         }
     } else {
-        res += "<tr><td>Minimum</td><td>" + minimum(v.values) + "</td></tr>"
-        res += "<tr><td>Mean</td><td>" + mean(v.values) + "</td></tr>"
-        res += "<tr><td>Maximum</td><td>" + maximum(v.values) + "</td></tr>"
-        res += "<tr><td>Standard deviation</td><td>" + stddev(v.values) + "</td></tr>"
+        round = function(num) {
+            if (num > .09) {
+                return Math.round(num * 100) / 100
+            } else {
+                return num.toPrecision(4)
+            }
+        }
+
+        res += "<tr><td>Minimum</td><td>" + round(minimum(values)) + "</td></tr>"
+        res += "<tr><td>Mean</td><td>" + round(mean(v.values)) + "</td></tr>"
+        res += "<tr><td>Maximum</td><td>" + round(maximum(v.values)) + "</td></tr>"
+        res += "<tr><td>Standard deviation</td><td>" + round(stddev(v.values)) + "</td></tr>"
     }
 
     res += "</table>"
