@@ -1,6 +1,6 @@
 class Info {
 
-    updateVariableDescription(data, selectedVar1, selectedVar2, selectedVar3, selectedVarSubset) {
+    updateVariableDescription(data, selectedGraph, regression, selectedVar1, selectedVar2, selectedVar3, selectedVarSubset) {
 
         var desc = '';
 
@@ -19,6 +19,10 @@ class Info {
                                     
             if (selectedVarSubset) {
                 desc += "<h3>Subset variable</h3>" + data.getDescription(selectedVarSubset);
+            }
+
+            if (selectedGraph === "scatter" & regression) {
+                desc += "<h3>Regression table</h3>" + data.getRegressionTables(selectedVar1, selectedVar2, selectedVar3);
             }
         }
 

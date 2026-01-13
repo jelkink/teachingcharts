@@ -1,10 +1,18 @@
 import { tabulate } from "./Tabulate"
-import { mean, stddev, minimum, maximum } from "./Stats"
+import { mean, stddev, minimum, maximum, linearRegression } from "./Stats"
 
 function Data() {
 
     this.data = null
     this.filename = ""
+}
+
+round = function(num) {
+    if (num > .09) {
+        return Math.round(num * 100) / 100
+    } else {
+        return num.toPrecision(4)
+    }
 }
 
 Data.prototype.changeFile = async function(name) {
@@ -77,13 +85,6 @@ Data.prototype.getDescription = function(v) {
             res += "<tr><td>" + key + "</td><td>" + v.labels[key] + "</td><td>" + table[v.labels[key]] + "</td></tr>"
         }
     } else {
-        round = function(num) {
-            if (num > .09) {
-                return Math.round(num * 100) / 100
-            } else {
-                return num.toPrecision(4)
-            }
-        }
 
         res += "<tr><td>Minimum</td><td>" + round(minimum(values)) + "</td></tr>"
         res += "<tr><td>Mean</td><td>" + round(mean(v.values)) + "</td></tr>"
@@ -91,6 +92,18 @@ Data.prototype.getDescription = function(v) {
         res += "<tr><td>Standard deviation</td><td>" + round(stddev(v.values)) + "</td></tr>"
     }
 
+    res += "</table>"
+
+    return res
+}
+
+Data.prototype.getRegressionTables = function(var1, var2, var3) {
+
+    const coef = linearRegression(var1, var2)
+
+    var res = "<table>"
+    res += "<tr><td>Intercept</td><td>" + round(coef[0]) + "</td></tr>"
+    res += "<tr><td>Slope</td><td>" + round(coef[1]) + "</td></tr>"
     res += "</table>"
 
     return res

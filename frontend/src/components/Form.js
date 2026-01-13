@@ -22,7 +22,7 @@ function Form({data, plot, info}) {
     useEffect(() => {
 
         plot.update(data, selectedGraph, selectedVar1, selectedVar2, selectedVar3, selectedVarSubset, selectedGroupSubset, subset, proportion, jitter, jitter_sd, bins, regression)
-        info.updateVariableDescription(data, selectedVar1, selectedVar2, selectedVar3, selectedVarSubset)
+        info.updateVariableDescription(data, selectedGraph, regression, selectedVar1, selectedVar2, selectedVar3, selectedVarSubset)
     }, [selectedGraph, selectedVar1, selectedVar2, selectedVar3, selectedVarSubset, selectedGroupSubset, subset, proportion, jitter, jitter_sd, bins, regression])
 
     useEffect((e) => {
