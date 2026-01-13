@@ -61,7 +61,7 @@ function Form({data, plot, info}) {
                     <tr>
                         <td>Graph type</td>
                         <td>
-                                <select value={selectedGraph} onChange={(e) => setSelectedGraph(e.target.value)}>
+                            <select value={selectedGraph} onChange={(e) => setSelectedGraph(e.target.value)}>
                                 {graphs.map((option, index) => (
                                     <option key={index} value={option}>
                                         {option}
