@@ -103,10 +103,10 @@ Data.prototype.getRegressionTables = function(yname, xname, zname) {
     const xvar = this.getVariable(xname)
     const zvar = this.getVariable(zname)
 
-    const y = zvar == [] ? [yvar.values] : split_by_group(yvar, zvar).map((y) => y.values)
-    const x = zvar == [] ? [xvar.values] : split_by_group(xvar, zvar).map((x) => x.values)
+    const y = zvar.length === 0 ? [yvar.values] : split_by_group(yvar, zvar).map((y) => y.values)
+    const x = zvar.length === 0 ? [xvar.values] : split_by_group(xvar, zvar).map((x) => x.values)
 
-    const labels = zvar == [] ? xvar.label : Object.keys(tabulate(zvar, true))
+    const labels = zvar.length === 0 ? xvar.label : Object.keys(tabulate(zvar, true))
 
     var res = "Dependent variable: <i>" + yname + "</i><br/><br/>"
 
@@ -116,7 +116,7 @@ Data.prototype.getRegressionTables = function(yname, xname, zname) {
 
         res += "<table>"
 
-        if (zvar != []) {
+        if (zvar.length !== 0) {
             res += "<tr><td colspan=\"4\" align=\"left\"><b>Model " + (key + 1) + "</b> (<i>" + zname + "</i> = " + labels[key] + ")</td></tr>"
         }
 
