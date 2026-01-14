@@ -22,7 +22,7 @@ class Info {
             }
 
             if (selectedGraph === "scatter" & regression) {
-                desc += "<h3>Regression table</h3>" + data.getRegressionTables(selectedVar1, selectedVar2, selectedVar3);
+                desc += "<h3>Regression tables</h3>" + data.getRegressionTables(selectedVar1, selectedVar2, selectedVar3);
             }
         }
 

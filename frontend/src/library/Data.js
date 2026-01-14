@@ -1,11 +1,11 @@
-import { tabulate } from "./Tabulate"
+import { tabulate, split_by_group } from "./Tabulate"
 import { mean, stddev, minimum, maximum, linearRegression } from "./Stats"
 
 function round(num) {
-    if (num > .09) {
-        return Math.round(num * 100) / 100
+    if (Math.abs(num) >= .1) {
+        return (Math.round(num * 100) / 100).toFixed(2)
     } else {
-        return num.toPrecision(4)
+        return num.toPrecision(3)
     }
 }
 
@@ -97,14 +97,42 @@ Data.prototype.getDescription = function(v) {
     return res
 }
 
-Data.prototype.getRegressionTables = function(var1, var2, var3) {
+Data.prototype.getRegressionTables = function(yname, xname, zname) {
 
-    const coef = linearRegression(var1, var2)
+    const yvar = this.getVariable(yname)
+    const xvar = this.getVariable(xname)
+    const zvar = this.getVariable(zname)
 
-    var res = "<table>"
-    res += "<tr><td>Intercept</td><td>" + round(coef[0]) + "</td></tr>"
-    res += "<tr><td>Slope</td><td>" + round(coef[1]) + "</td></tr>"
-    res += "</table>"
+    const y = zvar == [] ? [yvar.values] : split_by_group(yvar, zvar).map((y) => y.values)
+    const x = zvar == [] ? [xvar.values] : split_by_group(xvar, zvar).map((x) => x.values)
+
+    const labels = zvar == [] ? xvar.label : Object.keys(tabulate(zvar, true))
+
+    var res = "Dependent variable: <i>" + yname + "</i><br/><br/>"
+
+    y.forEach((val, key) => {
+
+        const coef = linearRegression(y[key], x[key])
+
+        res += "<table>"
+
+        if (zvar != []) {
+            res += "<tr><td colspan=\"4\" align=\"left\"><b>Model " + (key + 1) + "</b> (<i>" + zname + "</i> = " + labels[key] + ")</td></tr>"
+        }
+
+        res += "<tr style=\"border-bottom:1px solid black\"><td></td><td>Estimate</td><td>Std. Error</td></tr>"
+        res += "<tr><td><i>" + xname + "</i></td><td align=\"right\">" + round(coef[1]) + "</td>"
+        res += "<td align=\"right\">(" + round(coef[3]) + ")</td>"
+        res += "<td>" + (Math.abs(coef[1] / coef[3]) > 1.96 ? "*" : "") + "</td></tr>"
+        res += "<tr style=\"border-bottom:1px solid black\"><td>Intercept</td><td align=\"right\">" + round(coef[0]) + "</td>"
+        res += "<td align=\"right\">(" + round(coef[2]) + ")</td>"
+        res += "<td>" + (Math.abs(coef[0] / coef[2]) > 1.96 ? "*" : "") + "</td></tr>"
+        res += "<tr><td>n</td><td align=\"right\">" + coef[4] + "</td><td></td></tr>"
+        res += "<tr style=\"border-bottom:1px solid black\"><td>R²</td><td align=\"right\">" + round(coef[5]) + "</td><td></td></tr>"
+        res += "</table><br/><br/>"
+    })
+
+    res += "<i>* indicates statistical significance at α = 0.05</i>"
 
     return res
 }
