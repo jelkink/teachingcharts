@@ -1,0 +1,23 @@
+services:
+  web-dev:
+    profiles: ["dev"]
+    build:
+      context: .
+      dockerfile: Dockerfile-dev
+    volumes:
+      - ./frontend:/app
+    environment:
+      - HOST=0.0.0.0
+      - PORT=3000
+      - WDS_SOCKET_PORT=8080
+    command: sh -c "npm install && npm start"
+    ports:
+      - "8080:3000"
+
+  web-prod:
+    profiles: ["prod"]
+    build:
+      context: .
+      dockerfile: Dockerfile-prod
+    ports:
+      - "8080:5000"

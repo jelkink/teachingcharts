@@ -1,0 +1,21 @@
+# ---------- build stage ----------
+FROM node:20-alpine AS build
+
+WORKDIR /app
+
+COPY frontend/package*.json ./
+RUN npm install
+
+COPY frontend ./
+RUN npm run build
+
+# ---------- runtime stage ----------
+FROM node:20-alpine
+
+WORKDIR /app
+
+RUN npm install -g serve@11.3.1
+
+COPY --from=build /app/build ./build
+
+CMD ["serve", "build"]

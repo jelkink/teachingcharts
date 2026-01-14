@@ -26,7 +26,7 @@ Data.prototype.load = async function() {
     console.log("Loading data (" + this.filename + ")")
 
     try {
-        const response = await fetch("./data/" + this.filename + "_data.json")
+        const response = await fetch(process.env.PUBLIC_URL + "/data/" + this.filename + "_data.json")
         this.data = await response.json()
     } catch (error) {
         console.log("ERROR Fetching data files: ", error)
