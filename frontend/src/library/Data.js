@@ -1,18 +1,18 @@
 import { tabulate } from "./Tabulate"
 import { mean, stddev, minimum, maximum, linearRegression } from "./Stats"
 
-function Data() {
-
-    this.data = null
-    this.filename = ""
-}
-
-round = function(num) {
+function round(num) {
     if (num > .09) {
         return Math.round(num * 100) / 100
     } else {
         return num.toPrecision(4)
     }
+}
+
+function Data() {
+
+    this.data = null
+    this.filename = ""
 }
 
 Data.prototype.changeFile = async function(name) {
@@ -86,7 +86,7 @@ Data.prototype.getDescription = function(v) {
         }
     } else {
 
-        res += "<tr><td>Minimum</td><td>" + round(minimum(values)) + "</td></tr>"
+        res += "<tr><td>Minimum</td><td>" + round(minimum(v.values)) + "</td></tr>"
         res += "<tr><td>Mean</td><td>" + round(mean(v.values)) + "</td></tr>"
         res += "<tr><td>Maximum</td><td>" + round(maximum(v.values)) + "</td></tr>"
         res += "<tr><td>Standard deviation</td><td>" + round(stddev(v.values)) + "</td></tr>"
