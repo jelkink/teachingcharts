@@ -9,10 +9,22 @@ Go to the root folder and take the following steps:
 For a development environment:
 
 ````
+docker compose --profile dev build --no-cache
+````
+
+The above is only done once. After that, you can use the following to boot up the local server:
+
+````
 docker compose --profile dev up
 ````
 
 For a production environment:
+
+````
+docker compose --profile prod build --no-cache
+````
+
+The above is only done once. After that, you can use the following to boot up the local server:
 
 ````
 docker compose --profile prod up
