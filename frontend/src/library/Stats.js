@@ -56,7 +56,7 @@ function multipleRegression(y, X) {
 
     const R2 = 1 - rss / math.sum(math.dotPow(math.subtract(ymatrix, mean(y)), 2))
 
-    return [ B._data, se._data, n, R2 ]
+    return [ B._data, se._data, n, R2, k ]
 }
 
 function linearRegression(y, x) {

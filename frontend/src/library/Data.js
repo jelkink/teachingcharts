@@ -146,34 +146,39 @@ Data.prototype.getMultipleRegressionTable = function(yname, xname, zname) {
 
     var X = []
 
-    X.push(repeat(1, y.length))
-    groups.map((group, key) => {
+    groups.map((group) => {
+        X.push(zvar.values.map((val) => val == group ? 1 : 0))
+    })   
+
+    groups.map((group) => {
         X.push(xvar.values.map((val, key) => zvar.values[key] == group ? val : 0))
     })   
 
     const coef = multipleRegression(y, X)
+
+    const k = coef[4]
 
     var res = "Dependent variable: <i>" + yname + "</i><br/><br/>"
 
     res += "<table>"
     res += "<tr class=\"dividerBottom\"><td></td><td>Estimate</td><td>Std. Error</td></tr>"
 
-    coef[0].forEach((val, key) => {
+    for (let i = 0; i < k; i++) {
 
-        const b = val
-        const se = coef[1][key]
+        const b = coef[0][i]
+        const se = coef[1][i]
 
-        if (key === 0) {
-            var label = "Intercept"
+        if (i < k / 2) {
+            var label = zname + " = " + labels[i]
         } else {
-            var label = xname + " (" + zname + ": " + labels[key - 1] + ")"
+            var label = xname + " (" + zname + " = " + labels[i - k / 2] + ")"
         }
 
         res += "<tr><td><i>" + label + "</i></td>"
         res += "<td align=\"right\">" + round(b) + "</td>"
         res += "<td align=\"right\">(" + round(se) + ")</td>"
         res += "<td>" + (Math.abs(b / se) > 1.96 ? "*" : "") + "</td></tr>"
-    })
+    }
 
     res += "<tr class=\"dividerTop\"><td>n</td><td align=\"right\">" + coef[2] + "</td><td></td></tr>"
     res += "<tr><td>R²</td><td align=\"right\">" + round(coef[3]) + "</td><td></td></tr>"
