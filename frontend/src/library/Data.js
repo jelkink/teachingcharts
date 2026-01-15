@@ -113,15 +113,15 @@ Data.prototype.getRegressionTables = function(yname, xname, zname) {
             res += "<tr><td colspan=\"4\" align=\"left\"><b>Model " + (key + 1) + "</b> (<i>" + zname + "</i> = " + labels[key] + ")</td></tr>"
         }
 
-        res += "<tr class=\"divider\"><td></td><td>Estimate</td><td>Std. Error</td></tr>"
-        res += "<tr><td><i>" + xname + "</i></td><td align=\"right\">" + round(coef[1]) + "</td>"
-        res += "<td align=\"right\">(" + round(coef[3]) + ")</td>"
-        res += "<td>" + (Math.abs(coef[1] / coef[3]) > 1.96 ? "*" : "") + "</td></tr>"
-        res += "<tr class=\"divider\"><td>Intercept</td><td align=\"right\">" + round(coef[0]) + "</td>"
-        res += "<td align=\"right\">(" + round(coef[2]) + ")</td>"
-        res += "<td>" + (Math.abs(coef[0] / coef[2]) > 1.96 ? "*" : "") + "</td></tr>"
-        res += "<tr><td>n</td><td align=\"right\">" + coef[4] + "</td><td></td></tr>"
-        res += "<tr class=\"divider\"><td>R²</td><td align=\"right\">" + round(coef[5]) + "</td><td></td></tr>"
+        res += "<tr class=\"dividerBottom\"><td></td><td>Estimate</td><td>Std. Error</td></tr>"
+        res += "<tr><td>Intercept</td><td align=\"right\">" + round(coef[0][0]) + "</td>"
+        res += "<td align=\"right\">(" + round(coef[1][0]) + ")</td>"
+        res += "<td>" + (Math.abs(coef[0][0] / coef[1][0]) > 1.96 ? "*" : "") + "</td></tr>"
+        res += "<tr><td><i>" + xname + "</i></td><td align=\"right\">" + round(coef[0][1]) + "</td>"
+        res += "<td align=\"right\">(" + round(coef[1][1]) + ")</td>"
+        res += "<td>" + (Math.abs(coef[0][1] / coef[1][1]) > 1.96 ? "*" : "") + "</td></tr>"
+        res += "<tr class=\"dividerTop\"><td>n</td><td align=\"right\">" + coef[2] + "</td><td></td></tr>"
+        res += "<tr><td>R²</td><td align=\"right\">" + round(coef[3]) + "</td><td></td></tr>"
         res += "</table><br/><br/>"
     })
 
@@ -137,54 +137,46 @@ Data.prototype.getMultipleRegressionTable = function(yname, xname, zname) {
     const xvar = this.getVariable(xname)
     const zvar = this.getVariable(zname)
 
-    const labels = zvar.length === 0 ? xvar.label : Object.keys(tabulate(zvar, true))
+    if (zvar.length === 0) return this.getRegressionTables(yname, xname, zname)
+
+    const labels = Object.keys(tabulate(zvar, true))
+    const groups = Object.keys(tabulate(zvar, false))
 
     const y = yvar.values
 
-    if (zvar.length === 0) {
+    var X = []
 
-        var X = [repeat(1, y.length), xvar.values]
-    } else {
-        
-        var X = []
-        const groups = Object.keys(tabulate(zvar, false))
-
-        groups.map((group, key) => {
-            if (key === 0) {
-                X.push(repeat(1, y.length))
-                X.push(xvar.values)
-            } else {
-                X.push(xvar.values.map((val, key) => zvar.values[key] == group ? val : 0))
-            }
-        })    
-    }
-
-    var res = "Dependent variable: <i>" + yname + "</i><br/><br/>"
+    X.push(repeat(1, y.length))
+    groups.map((group, key) => {
+        X.push(xvar.values.map((val, key) => zvar.values[key] == group ? val : 0))
+    })   
 
     const coef = multipleRegression(y, X)
 
-    res += "DEBUG: coef = " + JSON.stringify(coef) + "<br/>"
+    var res = "Dependent variable: <i>" + yname + "</i><br/><br/>"
 
     res += "<table>"
+    res += "<tr class=\"dividerBottom\"><td></td><td>Estimate</td><td>Std. Error</td></tr>"
 
-    // if (zvar.length === 0) {
+    coef[0].forEach((val, key) => {
 
-    // } else {
+        const b = val
+        const se = coef[1][key]
 
-    //     coef[1].forEach((val, key) => { // This needs to loop over both slope and standard error
+        if (key === 0) {
+            var label = "Intercept"
+        } else {
+            var label = xname + " (" + zname + ": " + labels[key - 1] + ")"
+        }
 
-    //         if (key === 0) {
-    //             res += "<tr class=\"divider\"><td>Intercept</td>"
-    //         } else {
-    //             res += "<tr><td><i>" + (zvar.length === 0 ? xname : labels[key - 1]) + "</i></td>"
-    //         }
+        res += "<tr><td><i>" + label + "</i></td>"
+        res += "<td align=\"right\">" + round(b) + "</td>"
+        res += "<td align=\"right\">(" + round(se) + ")</td>"
+        res += "<td>" + (Math.abs(b / se) > 1.96 ? "*" : "") + "</td></tr>"
+    })
 
-    //         res += "<td align=\"right\">" + round(coef[key][0]) + "</td>"
-    //         res += "<td align=\"right\">(" + round(coef[key][2]) + ")</td>"
-    //         res += "<td>" + (Math.abs(coef[key][0] / coef[key][2]) > 1.96 ? "*" : "") + "</td></tr>"
-    //     })
-    // }
-
+    res += "<tr class=\"dividerTop\"><td>n</td><td align=\"right\">" + coef[2] + "</td><td></td></tr>"
+    res += "<tr><td>R²</td><td align=\"right\">" + round(coef[3]) + "</td><td></td></tr>"
     res += "</table><br/><br/>"
     res += "<i>* indicates statistical significance at α = 0.05</i>"
 

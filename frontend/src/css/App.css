@@ -20,8 +20,12 @@ a:hover {
   color: var(--red);
 }
 
-tr.divider > td {
+tr.dividerBottom > td {
   border-bottom: 1px solid black;
+}
+
+tr.dividerTop > td {
+  border-top: 1px solid black;
 }
 
 #header {
