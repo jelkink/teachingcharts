@@ -1,13 +1,6 @@
 import { tabulate, split_by_group } from "./Tabulate"
-import { mean, stddev, minimum, maximum, linearRegression } from "./Stats"
-
-function round(num) {
-    if (Math.abs(num) >= .1) {
-        return (Math.round(num * 100) / 100).toFixed(2)
-    } else {
-        return num.toPrecision(3)
-    }
-}
+import { mean, stddev, minimum, maximum, linearRegression, multipleRegression } from "./Stats"
+import { repeat, round } from "./Utils.js"
 
 function Data() {
 
@@ -132,6 +125,67 @@ Data.prototype.getRegressionTables = function(yname, xname, zname) {
         res += "</table><br/><br/>"
     })
 
+    res += "<i>* indicates statistical significance at α = 0.05</i>"
+
+    return res
+}
+
+
+Data.prototype.getMultipleRegressionTable = function(yname, xname, zname) {
+
+    const yvar = this.getVariable(yname)
+    const xvar = this.getVariable(xname)
+    const zvar = this.getVariable(zname)
+
+    const labels = zvar.length === 0 ? xvar.label : Object.keys(tabulate(zvar, true))
+
+    const y = yvar.values
+
+    if (zvar.length === 0) {
+
+        var X = [repeat(1, y.length), xvar.values]
+    } else {
+        
+        var X = []
+        const groups = Object.keys(tabulate(zvar, false))
+
+        groups.map((group, key) => {
+            if (key === 0) {
+                X.push(repeat(1, y.length))
+                X.push(xvar.values)
+            } else {
+                X.push(xvar.values.map((val, key) => zvar.values[key] == group ? val : 0))
+            }
+        })    
+    }
+
+    var res = "Dependent variable: <i>" + yname + "</i><br/><br/>"
+
+    const coef = multipleRegression(y, X)
+
+    res += "DEBUG: coef = " + JSON.stringify(coef) + "<br/>"
+
+    res += "<table>"
+
+    // if (zvar.length === 0) {
+
+    // } else {
+
+    //     coef[1].forEach((val, key) => { // This needs to loop over both slope and standard error
+
+    //         if (key === 0) {
+    //             res += "<tr class=\"divider\"><td>Intercept</td>"
+    //         } else {
+    //             res += "<tr><td><i>" + (zvar.length === 0 ? xname : labels[key - 1]) + "</i></td>"
+    //         }
+
+    //         res += "<td align=\"right\">" + round(coef[key][0]) + "</td>"
+    //         res += "<td align=\"right\">(" + round(coef[key][2]) + ")</td>"
+    //         res += "<td>" + (Math.abs(coef[key][0] / coef[key][2]) > 1.96 ? "*" : "") + "</td></tr>"
+    //     })
+    // }
+
+    res += "</table><br/><br/>"
     res += "<i>* indicates statistical significance at α = 0.05</i>"
 
     return res

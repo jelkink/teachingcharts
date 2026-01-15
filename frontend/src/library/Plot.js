@@ -119,7 +119,7 @@ const scatterPlot = function(var1, var2, var3, jitter, jitter_sd, regression = f
 
         y.forEach((val, key) => {
 
-            const coef = linearRegression(y[key], x[key])
+            const coef = linearRegression(y[key], x[key])[0]
 
             ds.push({
                 label: labels[key],
