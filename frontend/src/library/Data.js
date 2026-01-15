@@ -120,15 +120,15 @@ Data.prototype.getRegressionTables = function(yname, xname, zname) {
             res += "<tr><td colspan=\"4\" align=\"left\"><b>Model " + (key + 1) + "</b> (<i>" + zname + "</i> = " + labels[key] + ")</td></tr>"
         }
 
-        res += "<tr style=\"border-bottom:1px solid black\"><td></td><td>Estimate</td><td>Std. Error</td></tr>"
+        res += "<tr class=\"divider\"><td></td><td>Estimate</td><td>Std. Error</td></tr>"
         res += "<tr><td><i>" + xname + "</i></td><td align=\"right\">" + round(coef[1]) + "</td>"
         res += "<td align=\"right\">(" + round(coef[3]) + ")</td>"
         res += "<td>" + (Math.abs(coef[1] / coef[3]) > 1.96 ? "*" : "") + "</td></tr>"
-        res += "<tr style=\"border-bottom:1px solid black\"><td>Intercept</td><td align=\"right\">" + round(coef[0]) + "</td>"
+        res += "<tr class=\"divider\"><td>Intercept</td><td align=\"right\">" + round(coef[0]) + "</td>"
         res += "<td align=\"right\">(" + round(coef[2]) + ")</td>"
         res += "<td>" + (Math.abs(coef[0] / coef[2]) > 1.96 ? "*" : "") + "</td></tr>"
         res += "<tr><td>n</td><td align=\"right\">" + coef[4] + "</td><td></td></tr>"
-        res += "<tr style=\"border-bottom:1px solid black\"><td>R²</td><td align=\"right\">" + round(coef[5]) + "</td><td></td></tr>"
+        res += "<tr class=\"divider\"><td>R²</td><td align=\"right\">" + round(coef[5]) + "</td><td></td></tr>"
         res += "</table><br/><br/>"
     })
 

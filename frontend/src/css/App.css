@@ -20,6 +20,10 @@ a:hover {
   color: var(--red);
 }
 
+tr.divider > td {
+  border-bottom: 1px solid black;
+}
+
 #header {
   text-align: center;
 }
