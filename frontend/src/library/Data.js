@@ -1,6 +1,6 @@
-import { tabulate, split_by_group } from "./Tabulate"
-import { mean, stddev, minimum, maximum, linearRegression, multipleRegression } from "./Stats"
-import { repeat, round } from "./Utils.js"
+import { tabulate, split_by_group, tabulate_bivariate } from "./Tabulate"
+import { mean, stddev, minimum, maximum, linearRegression, multipleRegression, chisquared } from "./Stats"
+import { round, sig } from "./Utils.js"
 
 function Data() {
 
@@ -86,6 +86,40 @@ Data.prototype.getDescription = function(v) {
     }
 
     res += "</table>"
+
+    return res
+}
+
+Data.prototype.getIndependenceTestTable = function(yname, xname, zname) {
+
+    const yvar = this.getVariable(yname)
+    const xvar = this.getVariable(xname)
+    const zvar = this.getVariable(zname)
+
+    const n = yvar.values.length
+
+    const bivariate = zvar.length === 0
+
+    var res = ""
+    
+    if (bivariate) {
+        // const chisq = chisquared(split_by_group(yvar, zvar).map((y) => tabulate_bivariate(yvar, zvar, false).map((tab) => tab.data)), n)
+
+        const chisq = chisquared(xvar.values, yvar.values)
+
+        res += "<table>"
+        res += "<tr><td colspan=\"3\" align=\"left\"><b>Chi-squared test of association</b></td></tr>"
+        res += "<tr class=\"dividerBottom\"><td></td><td>Value</td><td></td></tr>"
+        res += "<tr><td>Cramér's V</td><td align=\"right\">" + round(chisq.CramersV) + "</td><td></td></tr>"
+        res += "<tr><td>Chi-squared</td><td align=\"right\">" + round(chisq.chi2) + "</td><td>" + sig(chisq.p) + "</td></tr>"
+        res += "<tr class=\"dividerTop\"><td>Degrees of freedom</td><td align=\"right\">" + chisq.df + "</td><td></td></tr>"
+        res += "<tr><td>n</td><td align=\"right\">" + chisq.n + "</td><td></td></tr>"
+        res += "</table><br/><br/>"
+    } else {
+
+    }
+
+    res += "<i>* indicates statistical significance at α = 0.1; ** at α = 0.05; and *** at α = 0.01</i>"
 
     return res
 }

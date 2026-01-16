@@ -22,7 +22,11 @@ class Info {
             }
 
             if (selectedGraph === "scatter" & regression) {
-                desc += "<h3>Regression tables</h3>" + data.getMultipleRegressionTable(selectedVar1, selectedVar2, selectedVar3);
+                desc += "<h3>Regression table</h3>" + data.getMultipleRegressionTable(selectedVar1, selectedVar2, selectedVar3);
+            }
+
+            if ((selectedGraph === "boxplot" | selectedGraph === "bar") & selectedVar2 !== "") {
+                desc += "<h3>Test for independence</h3>" + data.getIndependenceTestTable(selectedVar1, selectedVar2, selectedVar3);
             }
         }
 

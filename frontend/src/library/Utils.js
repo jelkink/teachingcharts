@@ -12,4 +12,16 @@ function repeat(value, length) {
     return Array.apply(null, Array(length)).map(function() { return value })
 }
 
-export { round, repeat };
+function sig(p) {
+    if (p < 0.01) {
+        return "***"
+    } else if (p < 0.05) {
+        return "**"
+    } else if (p < 0.1) {
+        return "*"
+    } else {
+        return ""
+    }
+}
+
+export { round, repeat, sig };

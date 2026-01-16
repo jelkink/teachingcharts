@@ -33,6 +33,53 @@ function covariance(v1, v2) {
     return mean(v1.map((x, i) => (x - mu1) * (v2[i] - mu2)))
 }
 
+function chisquared(v1, v2) {
+
+    let chi2 = 0.0
+
+    const n = v1.length
+
+    function relabel(v) {
+        const levels = Array.from(new Set(v))
+        const map = new Map(levels.map((x, i) => [x, i + 1]))
+        return v.map(x => map.get(x))
+    }
+
+    const v1r = relabel(v1)
+    const v2r = relabel(v2)
+
+    const I = math.max(v1r)
+    const J = math.max(v2r)
+
+    var table = math.zeros(I, J)
+    for (let i = 0; i < v1.length; i++) {
+        table._data[v1r[i]-1][v2r[i]-1] += 1
+    }
+
+    const row_sums = math.multiply(table, math.ones(J))._data
+    const col_sums = math.multiply(math.ones(I), table)._data
+
+    for (let i = 0; i < I; i++) {
+        for (let j = 0; j < J; j++) {
+            const expected = (row_sums[i] * col_sums[j]) / n
+
+            if (expected !== 0) {
+                chi2 += Math.pow(table._data[i][j] - expected, 2) / expected
+            }
+        }
+    }
+
+    const df = (I - 1) * (J - 1)
+
+    // Using Wilson–Hilferty normal approximation
+    const z = (Math.pow(chi2 / df, 1/3) - (1 - 2/(9 * df))) / Math.sqrt(2/(9 * df))
+    const p = 1 - 0.5 * (1 + math.erf(z / Math.sqrt(2)))
+
+    const CramersV = Math.sqrt(chi2 / (n * Math.min(I - 1, J - 1)))
+
+    return { chi2, df, p, CramersV, n }
+}
+
 function multipleRegression(y, X) {
 
     const Xmatrix = math.transpose(math.matrix(X))
@@ -86,4 +133,4 @@ function maximum(v) {
     return max
 }
 
-export { rand_normal, minimum, maximum, mean, stddev, variance, covariance, linearRegression, multipleRegression };
+export { rand_normal, minimum, maximum, mean, stddev, variance, covariance, linearRegression, multipleRegression, chisquared };
