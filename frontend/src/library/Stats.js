@@ -100,10 +100,13 @@ function multipleRegression(y, X) {
     const s2 = rss / (n - k)
 
     const se = math.map(math.diag(math.multiply(XtX_inv, s2)), math.sqrt)
+    const z = math.abs(math.dotDivide(B, se))
+    const phi = math.subtract(1, math.erf(math.dotDivide(z, Math.sqrt(2))))
+    const p = math.dotMultiply(2, phi)
 
     const R2 = 1 - rss / math.sum(math.dotPow(math.subtract(ymatrix, mean(y)), 2))
 
-    return [ B._data, se._data, n, R2, k ]
+    return { B: B._data, se: se._data, p: p._data, R2, n, k }
 }
 
 function linearRegression(y, x) {

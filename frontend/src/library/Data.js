@@ -90,34 +90,23 @@ Data.prototype.getDescription = function(v) {
     return res
 }
 
-Data.prototype.getIndependenceTestTable = function(yname, xname, zname) {
+Data.prototype.getIndependenceTestTable = function(yname, xname) {
 
     const yvar = this.getVariable(yname)
     const xvar = this.getVariable(xname)
-    const zvar = this.getVariable(zname)
 
     const n = yvar.values.length
 
-    const bivariate = zvar.length === 0
+    const chisq = chisquared(xvar.values, yvar.values)
 
-    var res = ""
-    
-    if (bivariate) {
-        // const chisq = chisquared(split_by_group(yvar, zvar).map((y) => tabulate_bivariate(yvar, zvar, false).map((tab) => tab.data)), n)
-
-        const chisq = chisquared(xvar.values, yvar.values)
-
-        res += "<table>"
-        res += "<tr><td colspan=\"3\" align=\"left\"><b>Chi-squared test of association</b></td></tr>"
-        res += "<tr class=\"dividerBottom\"><td></td><td>Value</td><td></td></tr>"
-        res += "<tr><td>Cramér's V</td><td align=\"right\">" + round(chisq.CramersV) + "</td><td></td></tr>"
-        res += "<tr><td>Chi-squared</td><td align=\"right\">" + round(chisq.chi2) + "</td><td>" + sig(chisq.p) + "</td></tr>"
-        res += "<tr class=\"dividerTop\"><td>Degrees of freedom</td><td align=\"right\">" + chisq.df + "</td><td></td></tr>"
-        res += "<tr><td>n</td><td align=\"right\">" + chisq.n + "</td><td></td></tr>"
-        res += "</table><br/><br/>"
-    } else {
-
-    }
+    var res = "<table>"
+    res += "<tr><td colspan=\"3\" align=\"left\"><b>Chi-squared test of association</b></td></tr>"
+    res += "<tr class=\"dividerBottom\"><td></td><td>Value</td><td></td></tr>"
+    res += "<tr><td>Cramér's V</td><td align=\"right\">" + round(chisq.CramersV) + "</td><td></td></tr>"
+    res += "<tr><td>Chi-squared</td><td align=\"right\">" + round(chisq.chi2) + "</td><td>" + sig(chisq.p) + "</td></tr>"
+    res += "<tr class=\"dividerTop\"><td>Degrees of freedom</td><td align=\"right\">" + chisq.df + "</td><td></td></tr>"
+    res += "<tr><td>n</td><td align=\"right\">" + chisq.n + "</td><td></td></tr>"
+    res += "</table><br/><br/>"
 
     res += "<i>* indicates statistical significance at α = 0.1; ** at α = 0.05; and *** at α = 0.01</i>"
 
@@ -148,18 +137,18 @@ Data.prototype.getRegressionTables = function(yname, xname, zname) {
         }
 
         res += "<tr class=\"dividerBottom\"><td></td><td>Estimate</td><td>Std. Error</td></tr>"
-        res += "<tr><td>Intercept</td><td align=\"right\">" + round(coef[0][0]) + "</td>"
-        res += "<td align=\"right\">(" + round(coef[1][0]) + ")</td>"
-        res += "<td>" + (Math.abs(coef[0][0] / coef[1][0]) > 1.96 ? "*" : "") + "</td></tr>"
-        res += "<tr><td><i>" + xname + "</i></td><td align=\"right\">" + round(coef[0][1]) + "</td>"
-        res += "<td align=\"right\">(" + round(coef[1][1]) + ")</td>"
-        res += "<td>" + (Math.abs(coef[0][1] / coef[1][1]) > 1.96 ? "*" : "") + "</td></tr>"
-        res += "<tr class=\"dividerTop\"><td>n</td><td align=\"right\">" + coef[2] + "</td><td></td></tr>"
-        res += "<tr><td>R²</td><td align=\"right\">" + round(coef[3]) + "</td><td></td></tr>"
+        res += "<tr><td>Intercept</td><td align=\"right\">" + round(coef.B[0]) + "</td>"
+        res += "<td align=\"right\">(" + round(coef.se[0]) + ")</td>"
+        res += "<td>" + sig(coef.p[0]) + "</td></tr>"
+        res += "<tr><td><i>" + xname + "</i></td><td align=\"right\">" + round(coef.B[1]) + "</td>"
+        res += "<td align=\"right\">(" + round(coef.se[1]) + ")</td>"
+        res += "<td>" + sig(coef.p[1]) + "</td></tr>"
+        res += "<tr class=\"dividerTop\"><td>n</td><td align=\"right\">" + coef.n + "</td><td></td></tr>"
+        res += "<tr><td>R²</td><td align=\"right\">" + round(coef.R2) + "</td><td></td></tr>"
         res += "</table><br/><br/>"
     })
 
-    res += "<i>* indicates statistical significance at α = 0.05</i>"
+    res += "<i>* indicates statistical significance at α = 0.1; ** at α = 0.05; and *** at α = 0.01</i>"
 
     return res
 }
