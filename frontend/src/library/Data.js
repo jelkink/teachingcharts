@@ -172,6 +172,11 @@ Data.prototype.getMultipleRegressionTable = function(yname, xname, zname) {
 
     var res = "Dependent variable: <i>" + yname + "</i><br/><br/>"
 
+    if (isNaN(coef.B[0])) {
+        res += "<i>Regression could not be computed (e.g., due to singularities in the data).</i>"
+        return res
+    }
+
     res += "<table>"
     res += "<tr class=\"dividerBottom\"><td></td><td>Estimate</td><td>Std. Error</td></tr>"
 
