@@ -20,6 +20,13 @@ class Info {
             if (selectedVarSubset) {
                 desc += "<h3>Subset variable</h3>" + data.getDescription(selectedVarSubset);
             }
+        }
+
+        document.getElementsByName("variables_description")[0].innerHTML = desc;
+
+        desc = '';
+
+        if (data) {
 
             if (selectedGraph === "scatter" & regression) {
                 desc += "<h3>Regression table</h3>" + data.getMultipleRegressionTable(selectedVar1, selectedVar2, selectedVar3);
@@ -30,7 +37,7 @@ class Info {
             }
         }
 
-        document.getElementsByName("variables_description")[0].innerHTML = desc;
+        document.getElementById("regression").innerHTML = desc;
     }
 };
 

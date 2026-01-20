@@ -56,6 +56,10 @@ tr.dividerTop > td {
   margin-left: 10px;
 }
 
+#regression {
+  margin-top: 75px;
+}
+
 .status {
   background-color: var(--black);
   color: var(--red);
