@@ -60,6 +60,12 @@ tr.dividerTop > td {
   margin-top: 75px;
 }
 
+select:disabled {
+  background-color: #f2f2f2;
+  color: #999;
+  cursor: not-allowed;
+}
+
 .status {
   background-color: var(--black);
   color: var(--red);

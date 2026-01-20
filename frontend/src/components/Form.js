@@ -19,6 +19,27 @@ function Form({data, plot, info}) {
     const [regression, setRegression] = useState(false)
     const [subset, setSubset] = useState(false)
 
+    const isVar2disabled = (selectedGraph !== "scatter" && selectedGraph !== "bar" && selectedGraph !== "boxplot")
+    const isVar3disabled = (selectedGraph !== "scatter" && selectedGraph !== "boxplot")
+    const isVarSubsetDisabled = !subset
+
+    const handleGraphChange = (e) => {
+
+        const value = e.target.value
+        
+        setSelectedGraph(value)
+
+        if (value === "" || value === "bar" || value === "histogram") {
+            setSelectedVar3("")
+        }
+
+        if (value === "" || value === "histogram") {
+            setSelectedVar2("")  
+        }
+
+        console.log(selectedVar2, selectedVar3)
+    }
+
     useEffect(() => {
 
         plot.update(data, selectedGraph, selectedVar1, selectedVar2, selectedVar3, selectedVarSubset, selectedGroupSubset, subset, proportion, jitter, jitter_sd, bins, regression)
@@ -61,7 +82,7 @@ function Form({data, plot, info}) {
                     <tr>
                         <td>Graph type</td>
                         <td>
-                            <select value={selectedGraph} onChange={(e) => setSelectedGraph(e.target.value)}>
+                            <select value={selectedGraph} onChange={(e) => handleGraphChange(e)}>
                                 {graphs.map((option, index) => (
                                     <option key={index} value={option}>
                                         {option}
@@ -86,7 +107,7 @@ function Form({data, plot, info}) {
                      <tr>
                         <td>Variable 2</td>
                         <td>
-                            <select value={selectedVar2} onChange={(e) => setSelectedVar2(e.target.value)}>
+                            <select value={selectedVar2} onChange={(e) => setSelectedVar2(e.target.value)} disabled={isVar2disabled}>
                                 {data.getVariableNames().map((option, index) => (
                                     <option key={index} value={option}>
                                         {option}
@@ -99,7 +120,7 @@ function Form({data, plot, info}) {
                      <tr>
                         <td>Variable 3</td>
                         <td>
-                            <select value={selectedVar3} onChange={(e) => setSelectedVar3(e.target.value)}>
+                            <select value={selectedVar3} onChange={(e) => setSelectedVar3(e.target.value)} disabled={isVar3disabled}>
                                 {data.getVariableNames().map((option, index) => (
                                     <option key={index} value={option}>
                                         {option}
@@ -167,7 +188,7 @@ function Form({data, plot, info}) {
                     <tr>
                         <td></td>
                         <td>
-                            <select value={selectedVarSubset} onChange={(e) => setSelectedVarSubset(e.target.value)}>
+                            <select value={selectedVarSubset} onChange={(e) => setSelectedVarSubset(e.target.value)} disabled={isVarSubsetDisabled}>
                                 {data.getVariableNames().map((option, index) => (
                                     <option key={index} value={option}>
                                         {option}
@@ -179,7 +200,7 @@ function Form({data, plot, info}) {
                      <tr>
                         <td></td>
                         <td>
-                            <select value={selectedGroupSubset} onChange={(e) => setSelectedGroupSubset(e.target.value)}>
+                            <select value={selectedGroupSubset} onChange={(e) => setSelectedGroupSubset(e.target.value)} disabled={isVarSubsetDisabled}>
                                 {data.getValueLabels(selectedVarSubset).map((option, index) => (
                                     <option key={index} value={option}>
                                         {option}

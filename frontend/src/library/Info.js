@@ -28,11 +28,11 @@ class Info {
 
         if (data) {
 
-            if (selectedGraph === "scatter" & regression) {
+            if (selectedGraph === "scatter" & regression & selectedVar1 & selectedVar2) {
                 desc += "<h3>Regression table</h3>" + data.getMultipleRegressionTable(selectedVar1, selectedVar2, selectedVar3);
             }
 
-            if (selectedGraph === "bar" & selectedVar2 !== "") {
+            if (selectedGraph === "bar" & selectedVar1 & selectedVar2) {
                 desc += "<h3>Test for independence</h3>" + data.getIndependenceTestTable(selectedVar1, selectedVar2);
             }
         }
