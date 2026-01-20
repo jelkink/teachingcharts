@@ -1,5 +1,5 @@
 import * as math from "mathjs"
-import { repeat } from "./Utils.js"
+import { repeat, relabel, outer, pf } from "./Utils.js"
 
 function rand_normal(mean=0, stdev=1) {
     const u = 1 - Math.random()
@@ -39,12 +39,6 @@ function chisquared(v1, v2) {
 
     const n = v1.length
 
-    function relabel(v) {
-        const levels = Array.from(new Set(v))
-        const map = new Map(levels.map((x, i) => [x, i + 1]))
-        return v.map(x => map.get(x))
-    }
-
     const v1r = relabel(v1)
     const v2r = relabel(v2)
 
@@ -78,6 +72,67 @@ function chisquared(v1, v2) {
     const CramersV = Math.sqrt(chi2 / (n * Math.min(I - 1, J - 1)))
 
     return { chi2, df, p, CramersV, n }
+}
+
+function anova(v1, v2, v3=null) {
+
+    const oneWay = v3 === null
+    
+    const y = math.matrix(v1)
+    const x1 = math.matrix(relabel(v2, 0))
+    const x2 = oneWay ? math.zeros(v1.length) : math.matrix(relabel(v3, 0))
+
+    const n = v1.length
+
+    const I = math.max(x1) + 1
+    const J = math.max(x2) + 1
+
+    var cell_means = math.zeros(I, J)
+    var cell_counts = math.zeros(I, J)
+    for (let i = 0; i < n; i++) {
+        const xi = x1._data[i]
+        const xj = x2._data[i]
+        cell_means._data[xi][xj] += y._data[i]
+        cell_counts._data[xi][xj] += 1
+    }
+    cell_means = math.dotDivide(cell_means, cell_counts)
+
+    const ni = math.sum(cell_counts, 1)
+    const nj = math.sum(cell_counts, 0)
+    const mu = mean(y._data)
+
+    const marg_means_i = math.dotMultiply(math.multiply(math.dotMultiply(cell_means, cell_counts), math.ones(J)), math.dotDivide(1, ni))
+    const marg_means_j = math.dotMultiply(math.transpose(math.multiply(math.ones(I), math.dotMultiply(cell_means, cell_counts))), math.dotDivide(1, nj))
+
+    const mmi = outer(marg_means_i, math.ones(J))
+    const mmj = outer(math.ones(I), marg_means_j)
+
+    const tss = math.sum(math.dotPow(math.subtract(y, mu), 2))
+
+    const ss1 = math.sum(math.dotMultiply(math.dotPow(math.subtract(marg_means_i, mu), 2), ni))
+    const ss2 = oneWay ? 0 : math.sum(math.dotMultiply(math.dotPow(math.subtract(marg_means_j, mu), 2), nj))
+    const ss3 = oneWay ? 0 : math.sum(math.dotMultiply(math.dotPow(math.add(math.subtract(cell_means, math.add(mmi, mmj)), mu), 2), cell_counts))
+    const sse = oneWay ? tss - ss1 : tss - ss1 - ss2 - ss3
+
+    const df1 = I - 1
+    const df2 = J - 1
+    const df3 = df1 * df2
+    const dfe = oneWay ? n - I : n - (I * J)
+
+    const ms1 = ss1 / df1
+    const ms2 = oneWay ? 0 : ss2 / df2
+    const ms3 = oneWay ? 0 : ss3 / df3
+    const mse = sse / dfe
+
+    const f1 = ms1 / mse
+    const f2 = oneWay ? 0 : ms2 / mse
+    const f3 = oneWay ? 0 : ms3 / mse
+
+    const p1 = 1-pf(f1, df1, dfe)
+    const p2 = oneWay ? null : 1-pf(f2, df2, dfe)
+    const p3 = oneWay ? null : 1-pf(f3, df3, dfe)
+
+    return { tss: tss, ss1: ss1, ss2: ss2, ss3: ss3, sse: sse, df1: df1, df2: df2, df3: df3, dfe: dfe, ms1: ms1, ms2: ms2, ms3: ms3, mse: mse, f1: f1, f2: f2, f3: f3, p1: p1, p2: p2, p3: p3, n: n }
 }
 
 function multipleRegression(y, X) {
@@ -142,4 +197,4 @@ function maximum(v) {
     return max
 }
 
-export { rand_normal, minimum, maximum, mean, stddev, variance, covariance, linearRegression, multipleRegression, chisquared };
+export { rand_normal, minimum, maximum, mean, stddev, variance, covariance, linearRegression, multipleRegression, chisquared, anova };

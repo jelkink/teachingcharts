@@ -35,6 +35,10 @@ class Info {
             if (selectedGraph === "bar" & selectedVar1 !== "" & selectedVar2 !== "") {
                 desc += "<h3>Test for independence</h3>" + data.getIndependenceTestTable(selectedVar1, selectedVar2);
             }
+
+            if (selectedGraph === "boxplot" & selectedVar1 !== "" & selectedVar2 !== "") {
+                desc += "<h3>ANOVA table</h3>" + data.getAnovaTable(selectedVar1, selectedVar2, selectedVar3);
+            }
         }
 
         document.getElementById("regression").innerHTML = desc;

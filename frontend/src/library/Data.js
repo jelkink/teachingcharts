@@ -1,5 +1,5 @@
 import { tabulate, split_by_group, tabulate_bivariate } from "./Tabulate"
-import { mean, stddev, minimum, maximum, linearRegression, multipleRegression, chisquared } from "./Stats"
+import { mean, stddev, minimum, maximum, linearRegression, multipleRegression, chisquared, anova } from "./Stats"
 import { round, sig } from "./Utils.js"
 
 function Data() {
@@ -142,14 +142,13 @@ Data.prototype.getRegressionTable = function(yname, xname) {
     return res
 }
 
-
 Data.prototype.getMultipleRegressionTable = function(yname, xname, zname) {
 
     const yvar = this.getVariable(yname)
     const xvar = this.getVariable(xname)
     const zvar = this.getVariable(zname)
 
-    if (zvar.length === 0) return this.getRegressionTable(yname, xname)
+    if (zvar.values.length === 0) return this.getRegressionTable(yname, xname)
 
     const labels = Object.keys(tabulate(zvar, true))
     const groups = Object.keys(tabulate(zvar, false))
@@ -204,5 +203,40 @@ Data.prototype.getMultipleRegressionTable = function(yname, xname, zname) {
 
     return res
 }
+
+Data.prototype.getAnovaTable = function(yname, xname, zname) {
+
+    const yvar = this.getVariable(yname)
+    const xvar = this.getVariable(xname)
+    const zvar = this.getVariable(zname)
+
+    const oneWay = zvar.values.length === 0
+
+    const coef = oneWay ? anova(yvar.values, xvar.values) : anova(yvar.values, xvar.values, zvar.values)
+
+    var res = "<table>"
+    res += "<tr><td colspan=\"4\" align=\"left\"><b>ANOVA table</b></td></tr>"
+    res += "<tr class=\"dividerBottom\"><td>Source</td><td>Degrees of freedom</td><td>Mean Square</td><td>F statistic</td><td></td></tr>"
+    res += "<tr><td>" + xname + "</td><td align=\"right\">" + coef.df1 + "</td>"
+    res += "<td align=\"right\">" + round(coef.ms1) + "</td>"
+    res += "<td align=\"right\">" + round(coef.f1) + "</td><td>" + sig(coef.p1) + "</td></tr>"
+
+    if (!oneWay) {
+        res += "<tr><td>" + zname + "</td><td align=\"right\">" + coef.df2 + "</td>"
+        res += "<td align=\"right\">" + round(coef.ms2) + "</td>"
+        res += "<td align=\"right\">" + round(coef.f2) + "</td><td>" + sig(coef.p2) + "</td></tr>"
+        res += "<tr><td>" + xname + " x " + zname + "</td><td align=\"right\">" + coef.df3 + "</td>"
+        res += "<td align=\"right\">" + round(coef.ms3) + "</td>"
+        res += "<td align=\"right\">" + round(coef.f3) + "</td><td>" + sig(coef.p3) + "</td></tr>"
+    }
+
+    res += "<tr><td>Residuals</td><td align=\"right\">" + coef.dfe + "</td>"
+    res += "<td align=\"right\">" + round(coef.mse) + "</td><td></td><td></td></tr>"
+    res += "<tr class=\"dividerTop\"><td>n</td><td align=\"right\">" + coef.n + "</td><td></td><td></td></tr>"
+    res += "</table><br/><br/>"
+
+    return res
+}
+
 
 export default Data
