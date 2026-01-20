@@ -113,41 +113,30 @@ Data.prototype.getIndependenceTestTable = function(yname, xname) {
     return res
 }
 
-Data.prototype.getRegressionTables = function(yname, xname, zname) {
+Data.prototype.getRegressionTable = function(yname, xname) {
 
     const yvar = this.getVariable(yname)
     const xvar = this.getVariable(xname)
-    const zvar = this.getVariable(zname)
 
-    const y = zvar.length === 0 ? [yvar.values] : split_by_group(yvar, zvar).map((y) => y.values)
-    const x = zvar.length === 0 ? [xvar.values] : split_by_group(xvar, zvar).map((x) => x.values)
-
-    const labels = zvar.length === 0 ? xvar.label : Object.keys(tabulate(zvar, true))
+    const y = yvar.values
+    const x = xvar.values
 
     var res = "Dependent variable: <i>" + yname + "</i><br/><br/>"
 
-    y.forEach((val, key) => {
+    const coef = linearRegression(y, x)
 
-        const coef = linearRegression(y[key], x[key])
-
-        res += "<table>"
-
-        if (zvar.length !== 0) {
-            res += "<tr><td colspan=\"4\" align=\"left\"><b>Model " + (key + 1) + "</b> (<i>" + zname + "</i> = " + labels[key] + ")</td></tr>"
-        }
-
-        res += "<tr class=\"dividerBottom\"><td></td><td>Estimate</td><td>Std. Error</td></tr>"
-        res += "<tr><td>Intercept</td><td align=\"right\">" + round(coef.B[0]) + "</td>"
-        res += "<td align=\"right\">(" + round(coef.se[0]) + ")</td>"
-        res += "<td>" + sig(coef.p[0]) + "</td></tr>"
-        res += "<tr><td><i>" + xname + "</i></td><td align=\"right\">" + round(coef.B[1]) + "</td>"
-        res += "<td align=\"right\">(" + round(coef.se[1]) + ")</td>"
-        res += "<td>" + sig(coef.p[1]) + "</td></tr>"
-        res += "<tr class=\"dividerTop\"><td>n</td><td align=\"right\">" + coef.n + "</td><td></td></tr>"
-        res += "<tr><td>R²</td><td align=\"right\">" + round(coef.R2) + "</td><td></td></tr>"
-        res += "</table><br/><br/>"
-    })
-
+    res += "<table>"
+    res += "<tr class=\"dividerBottom\"><td></td><td>Estimate</td><td>Std. Error</td></tr>"
+    res += "<tr><td>Intercept</td><td align=\"right\">" + round(coef.B[0]) + "</td>"
+    res += "<td align=\"right\">(" + round(coef.se[0]) + ")</td>"
+    res += "<td>" + sig(coef.p[0]) + "</td></tr>"
+    res += "<tr><td><i>" + xname + "</i></td><td align=\"right\">" + round(coef.B[1]) + "</td>"
+    res += "<td align=\"right\">(" + round(coef.se[1]) + ")</td>"
+    res += "<td>" + sig(coef.p[1]) + "</td></tr>"
+    res += "<tr class=\"dividerTop\"><td>n</td><td align=\"right\">" + coef.n + "</td><td></td></tr>"
+    res += "<tr><td>R²</td><td align=\"right\">" + round(coef.R2) + "</td><td></td></tr>"
+    res += "</table><br/><br/>"
+    
     res += "<i>* indicates statistical significance at α = 0.1; ** at α = 0.05; and *** at α = 0.01</i>"
 
     return res
@@ -160,7 +149,7 @@ Data.prototype.getMultipleRegressionTable = function(yname, xname, zname) {
     const xvar = this.getVariable(xname)
     const zvar = this.getVariable(zname)
 
-    if (zvar.length === 0) return this.getRegressionTables(yname, xname, zname)
+    if (zvar.length === 0) return this.getRegressionTable(yname, xname)
 
     const labels = Object.keys(tabulate(zvar, true))
     const groups = Object.keys(tabulate(zvar, false))
@@ -179,7 +168,7 @@ Data.prototype.getMultipleRegressionTable = function(yname, xname, zname) {
 
     const coef = multipleRegression(y, X)
 
-    const k = coef[4]
+    const k = coef.k
 
     var res = "Dependent variable: <i>" + yname + "</i><br/><br/>"
 
@@ -188,8 +177,8 @@ Data.prototype.getMultipleRegressionTable = function(yname, xname, zname) {
 
     for (let i = 0; i < k; i++) {
 
-        const b = coef[0][i]
-        const se = coef[1][i]
+        const b = coef.B[i]
+        const se = coef.se[i]
 
         if (i < k / 2) {
             var label = zname + " = " + labels[i]
@@ -203,8 +192,8 @@ Data.prototype.getMultipleRegressionTable = function(yname, xname, zname) {
         res += "<td>" + (Math.abs(b / se) > 1.96 ? "*" : "") + "</td></tr>"
     }
 
-    res += "<tr class=\"dividerTop\"><td>n</td><td align=\"right\">" + coef[2] + "</td><td></td></tr>"
-    res += "<tr><td>R²</td><td align=\"right\">" + round(coef[3]) + "</td><td></td></tr>"
+    res += "<tr class=\"dividerTop\"><td>n</td><td align=\"right\">" + coef.n + "</td><td></td></tr>"
+    res += "<tr><td>R²</td><td align=\"right\">" + round(coef.R2) + "</td><td></td></tr>"
     res += "</table><br/><br/>"
     res += "<i>* indicates statistical significance at α = 0.05</i>"
 
