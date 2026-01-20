@@ -90,6 +90,12 @@ function multipleRegression(y, X) {
 
     const Xt = math.transpose(Xmatrix)
     const XtX = math.multiply(Xt, Xmatrix)
+
+    if (math.det(XtX) === 0) {
+        console.log("Singular matrix in multiple regression")
+        return { B: repeat(NaN, k), se: repeat(NaN, k), p: repeat(NaN, k), R2: NaN, n, k }
+    }
+
     const XtX_inv = math.inv(XtX)
     const XtY = math.multiply(Xt, ymatrix)
     const B = math.multiply(XtX_inv, XtY)
