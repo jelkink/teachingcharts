@@ -36,8 +36,6 @@ function Form({data, plot, info}) {
         if (value === "" || value === "histogram") {
             setSelectedVar2("")  
         }
-
-        console.log(selectedVar2, selectedVar3)
     }
 
     useEffect(() => {

@@ -82,8 +82,6 @@ function subset_variable(variable, groups, subset) {
 
     const val = groups.labels ? Object.keys(groups.labels)[Object.values(groups.labels).indexOf(subset)] : subset
 
-    console.log("Subsetting\nvariable: ", variable, "\ngroups: ", groups, "\nsubset: ", subset, "\nval: ", val)
-
     return {
         values: variable.values.filter((v, key) => groups.values[key] == val),
         labels: variable.labels,
