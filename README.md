@@ -2,6 +2,14 @@
 
 Using JS chart libraries to create web interface for graphs in an undergraduate social science methodology module.
 
+# Preparing the code base
+
+To get all third party libraries updated on the system, go to the frontend folder and execute:
+
+````
+npm install
+````
+
 # Local installation
 
 Go to the root folder and take the following steps:
@@ -40,4 +48,4 @@ Go to the frontend folder and run:
 npm run build
 ````
 
-Then copy the files from the teachingcharts folder that is created to the web server.
+Then copy the files from the build folder that is created to the web server.
