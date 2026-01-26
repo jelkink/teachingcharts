@@ -54,7 +54,7 @@ Then copy the files from the build folder that is created to the web server.
 
 ## Preparing a data set
 
-The default implementation includes a very simple test data set and a small subset of the [2020 Irish National Election Survey](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/E6TAVY). Most users will want to add their own data set. Please see the R-script in the utils for some basic guidance on preparing a data set for use in Teaching Charts. 
+The default implementation includes a very simple test data set and a small subset of the [2020 Irish National Election Survey](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/E6TAVY) (see also the [Irish Election Studies Archive](https://irishelectionstudies.org)). Most users will want to add their own data set. Please see the R-script in the utils for some basic guidance on preparing a data set for use in Teaching Charts. 
 
 The resulting JSON file can then be added to the frontend/public/data folder. 
 
