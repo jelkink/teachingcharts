@@ -1,5 +1,5 @@
 import * as math from "mathjs"
-import { repeat, relabel, outer, pf } from "./Utils.js"
+import { repeat, relabel, outer, pf, dummyCode, interactionTerms } from "./Utils.js"
 
 function rand_normal(mean=0, stdev=1) {
     const u = 1 - Math.random()
@@ -74,67 +74,6 @@ function chisquared(v1, v2) {
     return { chi2, df, p, CramersV, n }
 }
 
-function anova(v1, v2, v3=null) {
-
-    const oneWay = v3 === null
-    
-    const y = math.matrix(v1)
-    const x1 = math.matrix(relabel(v2, 0))
-    const x2 = oneWay ? math.zeros(v1.length) : math.matrix(relabel(v3, 0))
-
-    const n = v1.length
-
-    const I = math.max(x1) + 1
-    const J = math.max(x2) + 1
-
-    var cell_means = math.zeros(I, J)
-    var cell_counts = math.zeros(I, J)
-    for (let i = 0; i < n; i++) {
-        const xi = x1._data[i]
-        const xj = x2._data[i]
-        cell_means._data[xi][xj] += y._data[i]
-        cell_counts._data[xi][xj] += 1
-    }
-    cell_means = math.dotDivide(cell_means, cell_counts)
-
-    const ni = math.sum(cell_counts, 1)
-    const nj = math.sum(cell_counts, 0)
-    const mu = mean(y._data)
-
-    const marg_means_i = math.dotMultiply(math.multiply(math.dotMultiply(cell_means, cell_counts), math.ones(J)), math.dotDivide(1, ni))
-    const marg_means_j = math.dotMultiply(math.transpose(math.multiply(math.ones(I), math.dotMultiply(cell_means, cell_counts))), math.dotDivide(1, nj))
-
-    const mmi = outer(marg_means_i, math.ones(J))
-    const mmj = outer(math.ones(I), marg_means_j)
-
-    const tss = math.sum(math.dotPow(math.subtract(y, mu), 2))
-
-    const ss1 = math.sum(math.dotMultiply(math.dotPow(math.subtract(marg_means_i, mu), 2), ni))
-    const ss2 = oneWay ? 0 : math.sum(math.dotMultiply(math.dotPow(math.subtract(marg_means_j, mu), 2), nj))
-    const ss3 = oneWay ? 0 : math.sum(math.dotMultiply(math.dotPow(math.add(math.subtract(cell_means, math.add(mmi, mmj)), mu), 2), cell_counts))
-    const sse = oneWay ? tss - ss1 : tss - ss1 - ss2 - ss3
-
-    const df1 = I - 1
-    const df2 = J - 1
-    const df3 = df1 * df2
-    const dfe = oneWay ? n - I : n - (I * J)
-
-    const ms1 = ss1 / df1
-    const ms2 = oneWay ? 0 : ss2 / df2
-    const ms3 = oneWay ? 0 : ss3 / df3
-    const mse = sse / dfe
-
-    const f1 = ms1 / mse
-    const f2 = oneWay ? 0 : ms2 / mse
-    const f3 = oneWay ? 0 : ms3 / mse
-
-    const p1 = 1-pf(f1, df1, dfe)
-    const p2 = oneWay ? null : 1-pf(f2, df2, dfe)
-    const p3 = oneWay ? null : 1-pf(f3, df3, dfe)
-
-    return { tss: tss, ss1: ss1, ss2: ss2, ss3: ss3, sse: sse, df1: df1, df2: df2, df3: df3, dfe: dfe, ms1: ms1, ms2: ms2, ms3: ms3, mse: mse, f1: f1, f2: f2, f3: f3, p1: p1, p2: p2, p3: p3, n: n }
-}
-
 function multipleRegression(y, X) {
 
     const Xmatrix = math.transpose(math.matrix(X))
@@ -148,6 +87,7 @@ function multipleRegression(y, X) {
 
     if (math.det(XtX) === 0) {
         console.log("Singular matrix in multiple regression")
+        console.log("X: ", Xmatrix)
         return { B: repeat(NaN, k), se: repeat(NaN, k), p: repeat(NaN, k), R2: NaN, n, k }
     }
 
@@ -167,13 +107,79 @@ function multipleRegression(y, X) {
 
     const R2 = 1 - rss / math.sum(math.dotPow(math.subtract(ymatrix, mean(y)), 2))
 
-    return { B: B._data, se: se._data, p: p._data, R2, n, k }
+    return { B: B._data, se: se._data, p: p._data, R2, n, k, rss }
 }
 
 function linearRegression(y, x) {
 
     return multipleRegression(y, [repeat(1, y.length), x])
 }
+
+function anova(v1, v2, v3=null) {
+
+    const oneWay = v3 === null
+
+    const n = v1.length
+
+    const y = v1
+    const x1 = relabel(v2)
+    const x2 = oneWay ? Array(n).fill(0) : relabel(v3)
+    const intercept = Array(n).fill(1)
+
+    const I = math.max(x1)
+    const J = math.max(x2)
+
+    const x1dummies = dummyCode(x1).slice(1)
+
+    const X0 = [intercept]
+    const X1 = [intercept, ...x1dummies]
+
+    let RSS0 = multipleRegression(y, X0).rss
+    let RSS1 = multipleRegression(y, X1).rss
+    let RSS2 = RSS1
+    let RSS3 = RSS1
+    let RSS4 = RSS1
+
+    if (!oneWay) {
+        const x2dummies = dummyCode(x2).slice(1)
+
+        const X2 = [intercept, ...x1dummies, ...x2dummies]
+        RSS2 = multipleRegression(y, X2).rss
+
+        const interactions = interactionTerms(x1dummies, x2dummies)
+        const X3 = [intercept, ...x1dummies, ...x2dummies, ...interactions]
+        RSS3 = multipleRegression(y, X3).rss
+
+        const X4 = [intercept, ...x2dummies]
+        RSS4 = multipleRegression(y, X4).rss
+    }
+
+    const ss1 = oneWay ? RSS0 - RSS1 : RSS4 - RSS3
+    const ss2 = oneWay ? 0 : RSS1 - RSS3
+    const ss3 = oneWay ? 0 : RSS2 - RSS3
+    const sse = oneWay ? RSS1 : RSS3
+
+    const df1 = I - 1
+    const df2 = oneWay ? 0 : J - 1
+    const df3 = df1 * df2
+    const dfe = n - (1 + df1 + df2 + df3)
+
+    const ms1 = ss1 / df1
+    const ms2 = oneWay ? 0 : ss2 / df2
+    const ms3 = oneWay ? 0 : ss3 / df3
+    const mse = sse / dfe
+
+    const f1 = ms1 / mse
+    const f2 = oneWay ? 0 : ms2 / mse
+    const f3 = oneWay ? 0 : ms3 / mse
+
+    const p1 = 1-pf(f1, df1, dfe)
+    const p2 = oneWay ? null : 1-pf(f2, df2, dfe)
+    const p3 = oneWay ? null : 1-pf(f3, df3, dfe)
+
+    return { ss1: ss1, ss2: ss2, ss3: ss3, sse: sse, df1: df1, df2: df2, df3: df3, dfe: dfe, ms1: ms1, ms2: ms2, ms3: ms3, mse: mse, f1: f1, f2: f2, f3: f3, p1: p1, p2: p2, p3: p3, n: n }
+}
+
 
 function minimum(v) {
 

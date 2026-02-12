@@ -36,81 +36,112 @@ function sig(p) {
 }
 
 function relabel(v, base=1) {
+
     const levels = Array.from(new Set(v))
     const map = new Map(levels.map((x, i) => [x, i + base]))
     return v.map(x => map.get(x))
 }
 
-// This function is written by ChatGPT, GPT-5 Mini
-function logGamma(xx) {
-  const cof = [76.18009172947146,-86.50532032941677,24.01409824083091,
-               -1.231739572450155,0.1208650973866179e-2,-0.5395239384953e-5]
-  let x = xx - 1
-  let tmp = x + 5.5
-  tmp -= (x + 0.5) * Math.log(tmp)
-  let ser = 1.000000000190015
-  for (let j = 0; j < cof.length; j++) {
-    x += 1
-    ser += cof[j]/x
-  }
-  return -tmp + Math.log(2.5066282746310005*ser)
+function dummyCode(x) {
+
+    const cols = []
+    var xint = relabel(x)
+    const levels = math.max(...xint)
+    for (let l = 1; l <= levels; l++) {
+        cols.push(xint.map(x => x === l ? 1 : 0))
+    }
+
+    return cols
 }
 
-// This function is written by ChatGPT, GPT-5 Mini
-function betaIncomplete(a,b,x) {
-  if (x < 0 || x > 1) throw new Error("x must be in [0,1]")
+function interactionTerms(A, B) {
+    const terms = []
+    for (let a of A) {
+        for (let b of B) {
+            terms.push(a.map((x,i) => x * b[i]))
+        }
+    }
+    return terms
+}
 
-  function bt() {
-    return Math.exp(logGamma(a+b) - logGamma(a) - logGamma(b) +
-                    a*Math.log(x) + b*Math.log(1-x))
-  }
+// Based on https://visualstudiomagazine.com/articles/2022/08/02/logbeta-loggamma-functions-csharp.aspx
+function logGamma(z) {
 
-  if (x === 0) return 0
-  if (x === 1) return 1
+    const coef = [76.18009172947146,-86.50532032941677,24.01409824083091,
+                 -1.231739572450155,0.1208650973866179e-2,-0.5395239384953e-5]
 
-  let swap = false
-  if (x > (a+1)/(a+b+2)) {
-    swap = true;
-    [a,b] = [b,a];
-    x = 1 - x;
-  }
+    if (z < 0.5) {
+        return Math.log(Math.PI / Math.sin(Math.PI * z)) - logGamma(1.0 - z)
+    }
 
-  let m = 0, qab = a+b, qap = a+1, qam = a-1
-  let c = 1, d = 1 - qab*x/qap
-  if (Math.abs(d) < 1e-30) d = 1e-30
-  d = 1/d
-  let h = d
+    let zz = z - 1
+    let b = z + 5.5
+    let sum = coef[0]
 
-  for (let m = 1; m <= 100; m++) {
-    let m2 = 2*m
-    let aa = m*(b-m)*x/((qam+m2)*(a+m2))
-    d = 1 + aa*d
-    if (Math.abs(d) < 1e-30) d = 1e-30
-    c = 1 + aa/c
-    if (Math.abs(c) < 1e-30) c = 1e-30
-    d = 1/d
-    h *= d*c
+    for (let i = 0; i < coef.length; i++) {
+        sum += coef[i] / (zz + i)
+    }
 
-    aa = -(a+m)*(qab+m)*x/((a+m2)*(qap+m2))
-    d = 1 + aa*d
-    if (Math.abs(d) < 1e-30) d = 1e-30
-    c = 1 + aa/c
-    if (Math.abs(c) < 1e-30) c = 1e-30
-    d = 1/d
-    let del = d*c
-    h *= del
-    if (Math.abs(del-1.0) < 3e-7) break
-  }
+    return 0.91893853320467274178 + Math.log(sum) - b + Math.log(b) * (zz + 0.5)
+}
 
-  let result = bt()/a * h
-  if (swap) result = 1 - result
-  return result
+// Based on https://visualstudiomagazine.com/articles/2022/08/02/logbeta-loggamma-functions-csharp.aspx
+function logBeta(a, b) {
+
+    return logGamma(a) + logGamma(b) - logGamma(a + b)
+}
+
+// Based on https://visualstudiomagazine.com/articles/2022/08/02/logbeta-loggamma-functions-csharp.aspx
+function approxContinuedFraction(x, a, b) {
+
+    const maxTerms = 100
+
+    var d = new Array(maxTerms).fill(0)
+
+    for (let m = 0; m < (maxTerms / 2); m++) {
+        
+        let i = 2 * m
+        let j = i + 1
+        
+        d[i] = (m * (b - m) * x) / ((a + 2 * m - 1) * (a + 2 * m))
+        d[j] = -1 * ((a + m) * (a + b + m) * x) / ((a + 2 * m) * (a + 2 * m + 1))
+    }
+
+    let t = new Array(maxTerms).fill(0)
+    t[maxTerms - 1] = 1 + d[maxTerms - 1]
+    for (let j = maxTerms - 2; j >= 1; j--) {
+        t[j] = 1 + d[j] / t[j + 1]
+    }
+
+    return 1 / t[1]
+}
+
+// Based on https://visualstudiomagazine.com/articles/2022/08/02/logbeta-loggamma-functions-csharp.aspx
+function regIncBeta(x, a, b) {
+
+    let cf = approxContinuedFraction(x, a, b)
+    let logTop = (a * Math.log(x)) + (b * Math.log(1 - x))
+    let logBot = Math.log(a) + logBeta(a, b)
+    let logLeft = logTop - logBot
+    
+    return Math.exp(logLeft) * cf
+}
+
+// Based on https://visualstudiomagazine.com/articles/2022/08/02/logbeta-loggamma-functions-csharp.aspx
+function regularizedIncompleteBeta(x, a, b) {
+
+  // pick the form of RegIncompleteBeta() that converges best
+  if (x < (a + 1.0) / (a + b + 2.0))
+    return regIncBeta(x, a, b)
+  else
+    return 1.0 - regIncBeta(1 - x, b, a)
 }
 
 function pf(f, df1, df2) {
-  const x = df1*f / (df1*f + df2);
-  return betaIncomplete(df1/2, df2/2, x);
+
+    const x = df1*f / (df1*f + df2)
+    return regularizedIncompleteBeta(x, df1/2, df2/2)
 }
 
-export { round, repeat, sig, relabel, outer, logGamma, betaIncomplete, pf }
+export { round, repeat, sig, relabel, outer, logGamma, pf, dummyCode, interactionTerms }
 

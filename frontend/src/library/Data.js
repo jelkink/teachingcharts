@@ -214,7 +214,14 @@ Data.prototype.getAnovaTable = function(yname, xname, zname) {
 
     const coef = oneWay ? anova(yvar.values, xvar.values) : anova(yvar.values, xvar.values, zvar.values)
 
-    var res = "<table>"
+    var res = ""
+
+    if (isNaN(coef.f1)) {
+        res += "<i>ANOVA could not be computed (e.g., due to singularities in the data).</i>"
+        return res
+    }
+
+    res += "<table>"
     res += "<tr><td colspan=\"4\" align=\"left\"><b>ANOVA table</b></td></tr>"
     res += "<tr class=\"dividerBottom\"><td>Source</td><td>Degrees of freedom</td><td>Mean Square</td><td>F statistic</td><td></td></tr>"
     res += "<tr><td>" + xname + "</td><td align=\"right\">" + coef.df1 + "</td>"
