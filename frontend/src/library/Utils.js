@@ -67,22 +67,25 @@ function interactionTerms(A, B) {
 // Based on https://visualstudiomagazine.com/articles/2022/08/02/logbeta-loggamma-functions-csharp.aspx
 function logGamma(z) {
 
-    const coef = [76.18009172947146,-86.50532032941677,24.01409824083091,
-                 -1.231739572450155,0.1208650973866179e-2,-0.5395239384953e-5]
+    const coef = [1.000000000190015, 76.18009172947146, -86.50532032941677,
+                 24.01409824083091, -1.231739572450155,
+                 0.1208650973866179e-2, -0.5395239384953e-5]
+
+    const LogSqrtTwoPi = 0.91893853320467274178
 
     if (z < 0.5) {
         return Math.log(Math.PI / Math.sin(Math.PI * z)) - logGamma(1.0 - z)
     }
 
-    let zz = z - 1
-    let b = z + 5.5
+    const zz = z - 1.0
+    const b = zz + 5.5
     let sum = coef[0]
 
-    for (let i = 0; i < coef.length; i++) {
+    for (let i = 1; i < coef.length; i++) {
         sum += coef[i] / (zz + i)
     }
 
-    return 0.91893853320467274178 + Math.log(sum) - b + Math.log(b) * (zz + 0.5)
+    return (LogSqrtTwoPi + Math.log(sum) - b) + (Math.log(b) * (zz + 0.5))
 }
 
 // Based on https://visualstudiomagazine.com/articles/2022/08/02/logbeta-loggamma-functions-csharp.aspx

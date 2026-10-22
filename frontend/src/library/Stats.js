@@ -154,8 +154,8 @@ function anova(v1, v2, v3=null) {
         RSS4 = multipleRegression(y, X4).rss
     }
 
-    const ss1 = oneWay ? RSS0 - RSS1 : RSS4 - RSS3
-    const ss2 = oneWay ? 0 : RSS1 - RSS3
+    const ss1 = oneWay ? RSS0 - RSS1 : RSS4 - RSS2
+    const ss2 = oneWay ? 0 : RSS1 - RSS2
     const ss3 = oneWay ? 0 : RSS2 - RSS3
     const sse = oneWay ? RSS1 : RSS3
 
