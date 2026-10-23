@@ -44,6 +44,11 @@ function Form({data, plot, info}) {
         info.updateVariableDescription(data, selectedGraph, regression, selectedVar1, selectedVar2, selectedVar3, selectedVarSubset)
     }, [selectedGraph, selectedVar1, selectedVar2, selectedVar3, selectedVarSubset, selectedGroupSubset, subset, proportion, jitter, jitter_sd, bins, regression])
 
+    useEffect(() => {
+
+        info.updateDataSetNotice(selectedDataSet)
+    }, [selectedDataSet])
+
     useEffect((e) => {
 
         if (data) {

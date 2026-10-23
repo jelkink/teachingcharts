@@ -71,7 +71,11 @@
 
         <h3>Irish National Election Study 2020</h3>
 
-            <p>This data set is a random subsample of the Irish National Election Study 2020 available on the <a href="https://dataverse.harvard.edu/dataverse/ines2020">Harvard Dataverse repository</a>. After a selection of variables and a random sample of cases are determined, any missing data has been interpolated preserving the univariate distribution - but not taking into account the joint distribution with other variables.</p>
+            <p>This data set is a random subsample of the Irish National Election Study 2020 available on the <a href="https://dataverse.harvard.edu/dataverse/ines2020">Harvard Dataverse repository</a>. After a selection of variables and a random sample of cases are determined, any missing data has been filled in by drawing at random from the observed values of each variable, preserving the univariate distribution - but not taking into account the joint distribution with other variables.</p>
+
+            <p><strong>Important:</strong> The Irish National Election Study data in Teaching Charts is not the original survey data. This keeps each variable's distribution roughly intact, but it breaks the relationships between variables and inflates the number of cases. The Chi-squared, regression and ANOVA results for this data set therefore do not reflect the real relationships in the survey. Use it to practise reading the output, not to draw substantive conclusions.</p>
+
+            <p>A recoded and relabelled version of the original data set is now available at the <a href="https://irishelectionstudies.org/" target="_blank">Irish Election Studies Archive</a>. Any serious analysis should be conducted using that version of the data.</p>
 
         <h3>Test data</h3>
 

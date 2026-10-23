@@ -60,6 +60,12 @@ tr.dividerTop > td {
   margin-top: 75px;
 }
 
+.notice {
+  border-left: 4px solid #e0a800;
+  background-color: #fff8e1;
+  padding: 8px 12px;
+}
+
 select:disabled {
   background-color: #f2f2f2;
   color: #999;

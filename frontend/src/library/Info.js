@@ -1,4 +1,15 @@
+const dataSetNotices = {
+    ines_2020: "<strong>Note:</strong> Missing values in this data set were filled in by drawing at random from the observed values of each variable. This keeps each variable's distribution roughly intact, but it breaks the relationships between variables and inflates the number of cases. The test results below do not reflect the real relationships in the Irish survey. Use them to practise reading the output, not to draw substantive conclusions."
+};
+
 class Info {
+
+    updateDataSetNotice(selectedDataSet) {
+
+        const notice = dataSetNotices[selectedDataSet] || '';
+
+        document.getElementsByName("dataset_notice")[0].innerHTML = notice ? "<p class=\"notice\">" + notice + "</p>" : '';
+    }
 
     updateVariableDescription(data, selectedGraph, regression, selectedVar1, selectedVar2, selectedVar3, selectedVarSubset) {
 
